@@ -1,6 +1,18 @@
 (() => {
   "use strict";
   const data = window.FORMAL_SCIENCES_CURRICULUM;
+  const additionsKey = "formal-sciences-atlas-additions-v1";
+  let localAdditions = [];
+  try {
+    localAdditions = JSON.parse(localStorage.getItem(additionsKey) || "[]");
+    if (!Array.isArray(localAdditions)) localAdditions = [];
+  } catch {
+    localAdditions = [];
+  }
+  localAdditions.forEach((addition) => {
+    if (addition.work && !data.works.some((item) => item.id === addition.work.id)) data.works.push(addition.work);
+    if (addition.concept && !data.concepts.some((item) => item.id === addition.concept.id)) data.concepts.push(addition.concept);
+  });
   const byId = new Map(data.concepts.map((item) => [item.id, item]));
   const subfieldById = new Map(data.subfields.map((item) => [item.id, item]));
   const areaById = new Map(data.areas.map((item) => [item.id, item]));
@@ -208,6 +220,40 @@
     return { generatedAt: new Date().toISOString(), metrics: { areas: data.areas.length, subfields: data.subfields.length, concepts: data.concepts.length }, checks: checks.map(([name, pass, value]) => ({ name, pass, value })) };
   }
 
+  function refreshAdditionCount() {
+    $("additionCount").textContent = `${localAdditions.length} local addition${localAdditions.length === 1 ? "" : "s"}`;
+    $("exportAdditions").disabled = localAdditions.length === 0;
+  }
+
+  function fillSubfields() {
+    const areaId = $("addArea").value;
+    const options = data.subfields.filter((item) => item.area === areaId);
+    $("addSubfield").innerHTML = options.map((item) => `<option value="${esc(item.id)}">${esc(item.title)}</option>`).join("");
+  }
+
+  function fillPrerequisites() {
+    const none = `<option value="">None</option>`;
+    const options = data.concepts
+      .slice()
+      .sort((a,b) => a.title.localeCompare(b.title))
+      .map((item) => `<option value="${esc(item.id)}">${esc(item.title)}</option>`).join("");
+    $("addRequired").innerHTML = none + options;
+    $("addParallel").innerHTML = none + options;
+  }
+
+  function initializeAddForm() {
+    $("addArea").innerHTML = data.areas.map((item) => `<option value="${esc(item.id)}">${esc(item.title)}</option>`).join("");
+    fillSubfields();
+    fillPrerequisites();
+    refreshAdditionCount();
+  }
+
+  function persistAddition(addition) {
+    localAdditions.push(addition);
+    localStorage.setItem(additionsKey, JSON.stringify(localAdditions));
+    refreshAdditionCount();
+  }
+
   $("searchInput").addEventListener("input", (event) => search(event.target.value));
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && document.activeElement !== $("searchInput")) {
@@ -220,6 +266,119 @@
     audit();
     $("auditDialog").showModal();
   });
+  $("showAddItem").addEventListener("click", () => {
+    $("addItemForm").hidden = false;
+    $("showAddItem").hidden = true;
+    $("addTitle").focus();
+  });
+  $("cancelAddItem").addEventListener("click", () => {
+    $("addItemForm").hidden = true;
+    $("showAddItem").hidden = false;
+    $("addItemForm").reset();
+    fillSubfields();
+  });
+  $("addArea").addEventListener("change", fillSubfields);
+  $("addItemForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const title = $("addTitle").value.trim();
+    if (data.concepts.some((item) => item.title.toLowerCase() === title.toLowerCase())) {
+      alert("A concept with this title already exists.");
+      return;
+    }
+    const suffix = `${Date.now()}-${title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}`;
+    const work = {
+      id: `local-work:${suffix}`,
+      author: $("addAuthor").value.trim(),
+      title: $("addWorkTitle").value.trim(),
+      edition: $("addEdition").value.trim(),
+      year: $("addYear").value.trim(),
+      url: $("addUrl").value.trim()
+    };
+    const concept = {
+      id: `local-concept:${suffix}`,
+      title,
+      subfield: $("addSubfield").value,
+      summary: $("addSummary").value.trim(),
+      required: $("addRequired").value ? [$("addRequired").value] : [],
+      parallel: $("addParallel").value ? [$("addParallel").value] : [],
+      readings: [{
+        work: work.id,
+        role: "Core",
+        locator: $("addLocator").value.trim(),
+        purpose: `Audited reading location for ${title}.`
+      }]
+    };
+    data.works.push(work);
+    data.concepts.push(concept);
+    workById.set(work.id, work);
+    byId.set(concept.id, concept);
+    incoming.set(concept.id, concept.required);
+    parallel.set(concept.id, concept.parallel);
+    concept.required.forEach((id) => {
+      if (!outgoing.has(id)) outgoing.set(id, []);
+      outgoing.get(id).push(concept.id);
+    });
+    persistAddition({work,concept});
+    const area = areaById.get(subfieldById.get(concept.subfield).area);
+    const subfield = subfieldById.get(concept.subfield);
+    const proposal = {
+      schema: "formal-sciences-taxonomy-addition/v1",
+      canonicalPath: {
+        areaId: area.id,
+        area: area.title,
+        subfieldId: subfield.id,
+        subfield: subfield.title
+      },
+      concept,
+      work
+    };
+    const issueTitle = `Taxonomy addition: ${title}`;
+    const issueBody = [
+      "## Canonical placement",
+      `**Area:** ${area.title}`,
+      `**Subfield:** ${subfield.title}`,
+      "",
+      "## Proposed item",
+      `**Concept:** ${title}`,
+      `**Summary:** ${concept.summary}`,
+      `**Sequential prerequisite:** ${concept.required.map((id) => byId.get(id)?.title).filter(Boolean).join(", ") || "None"}`,
+      `**Parallel prerequisite:** ${concept.parallel.map((id) => byId.get(id)?.title).filter(Boolean).join(", ") || "None"}`,
+      "",
+      "## Specific bibliography",
+      `${work.author}. *${work.title}*. ${work.edition}, ${work.year}.`,
+      `**Locator:** ${concept.readings[0].locator}`,
+      work.url ? `**Source:** ${work.url}` : "",
+      "",
+      "## Machine-readable proposal",
+      "```json",
+      JSON.stringify(proposal, null, 2),
+      "```"
+    ].filter((line) => line !== "").join("\n");
+    window.open(
+      `https://github.com/praveenjay80-sudo/CODEX-Formal-Sciences-Concepts-and-Works/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(issueBody)}&labels=taxonomy-addition`,
+      "_blank",
+      "noopener"
+    );
+    selectedArea = subfieldById.get(concept.subfield).area;
+    renderAreas();
+    renderTree();
+    fillPrerequisites();
+    audit();
+    $("addItemForm").reset();
+    $("addItemForm").hidden = true;
+    $("showAddItem").hidden = false;
+    fillSubfields();
+    selectConcept(concept.id);
+    $("auditDialog").close();
+  });
+  $("exportAdditions").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),additions:localAdditions}, null, 2)], {type:"application/json"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "formal-sciences-additions.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
   $("downloadAudit").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify({ curriculum: data, audit: audit() }, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
@@ -229,6 +388,7 @@
     URL.revokeObjectURL(link.href);
   });
 
+  initializeAddForm();
   renderAreas();
   renderTree();
 })();
