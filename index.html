@@ -114,6 +114,37 @@
         <h3>Checks</h3>
         <div id="auditChecks" class="audit-checks"></div>
       </section>
+      <section class="audit-add-section">
+        <div class="section-title-row">
+          <div>
+            <h3>Add audited item</h3>
+            <p>Add a confirmed omission with its placement, prerequisites, and specific reading location. The item appears in the tree immediately and remains on this device.</p>
+          </div>
+          <button id="showAddItem" type="button" class="button">Add item</button>
+        </div>
+        <form id="addItemForm" class="add-item-form" hidden>
+          <label>Area<select id="addArea" required></select></label>
+          <label>Subfield<select id="addSubfield" required></select></label>
+          <label class="wide">Concept title<input id="addTitle" required maxlength="120"></label>
+          <label class="wide">Concept summary<textarea id="addSummary" required rows="2" maxlength="400"></textarea></label>
+          <label>Sequential prerequisite<select id="addRequired"></select></label>
+          <label>Parallel prerequisite<select id="addParallel"></select></label>
+          <label>Author<input id="addAuthor" required maxlength="160"></label>
+          <label>Work title<input id="addWorkTitle" required maxlength="180"></label>
+          <label>Edition<input id="addEdition" required maxlength="80" placeholder="e.g. 3rd edition"></label>
+          <label>Year<input id="addYear" required inputmode="numeric" pattern="[0-9]{4}" maxlength="4"></label>
+          <label class="wide">Chapter or section locator<input id="addLocator" required maxlength="240" placeholder="e.g. Ch. 6 → §6.3: Exact section title"></label>
+          <label class="wide">Official or legal source URL<input id="addUrl" type="url" placeholder="https://"></label>
+          <div class="wide add-actions">
+            <button type="submit" class="button">Add and submit to main taxonomy</button>
+            <button id="cancelAddItem" type="button" class="button secondary">Cancel</button>
+          </div>
+        </form>
+        <div class="local-additions">
+          <span id="additionCount">0 local additions</span>
+          <button id="exportAdditions" type="button" class="button secondary">Export additions</button>
+        </div>
+      </section>
       <section>
         <h3>Semantic audit with OpenAI</h3>
         <p>GitHub Pages cannot protect an API key. The repository includes <code>scripts/audit.mjs</code>, which reads <code>OPENAI_API_KEY</code> from your local environment and never places it in browser code.</p>
