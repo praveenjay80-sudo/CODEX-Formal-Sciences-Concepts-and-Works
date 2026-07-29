@@ -17,13 +17,14 @@ An interactive prerequisite tree and concept-specific bibliography covering thes
 13. Computer science
 14. Cryptography
 
-The curriculum contains 167 subfields and 835 learnable concepts, distributed unevenly according to each area’s actual breadth. Every published concept has:
+The curriculum contains 183 subfields and 978 learnable concepts, distributed unevenly according to each area’s actual breadth. Every published concept has:
 
-- sequential prerequisite links;
+- a genuine, concept-specific summary (not a templated restatement of its subfield);
+- sequential prerequisite links, resolved both within and across areas — no unresolved reference is ever silently aliased to an unrelated concept;
 - parallel-preparation links where justified;
-- a named work, edition, and year;
-- a chapter, section, part, or whole-work locator;
-- a stated reading purpose.
+- two or more located works on average (687 deduplicated works across 1,588 total readings), each a real, verifiable named work with edition and year;
+- a chapter, section, part, or whole-work locator per reading;
+- a stated, reading-specific purpose per reading.
 
 MSC and ACM classification codes are not used as curriculum nodes. Classification systems index literature; they do not establish learning order.
 
@@ -39,21 +40,21 @@ npm test
 
 ## Semantic gap audit
 
-The browser never accepts or stores an OpenAI API key. Run the audit locally:
+The browser never accepts or stores an API key. Run the audit locally with either an OpenRouter or an OpenAI key:
 
 ```bash
-export OPENAI_API_KEY="your-key"
+export OPENROUTER_API_KEY="your-key"
 npm run audit
 ```
 
 PowerShell:
 
 ```powershell
-$env:OPENAI_API_KEY="your-key"
+$env:OPENROUTER_API_KEY="your-key"
 npm run audit
 ```
 
-The script uses the OpenAI Responses API. Override its default model with `OPENAI_MODEL`.
+If `OPENROUTER_API_KEY` is set, the script calls OpenRouter's chat completions endpoint (default model `anthropic/claude-sonnet-4.5`, override with `OPENROUTER_MODEL`). Otherwise it falls back to `OPENAI_API_KEY` and the OpenAI Responses API (default model `gpt-5.6-terra`, override with `OPENAI_MODEL`).
 
 ## Coverage statement
 
