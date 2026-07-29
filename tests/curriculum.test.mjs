@@ -4,8 +4,10 @@ import vm from "node:vm";
 import test from "node:test";
 
 const source = fs.readFileSync(new URL("../curriculum.js", import.meta.url), "utf8");
+const expansion = fs.readFileSync(new URL("../expansion.js", import.meta.url), "utf8");
 const context = { window: {} };
 vm.runInNewContext(source, context);
+vm.runInNewContext(expansion, context);
 const data = context.window.FORMAL_SCIENCES_CURRICULUM;
 
 test("publishes exactly the 14 declared areas", () => {
@@ -30,8 +32,8 @@ test("has broad subfield and concept coverage in every area", () => {
     assert.ok(subfields.length >= 5, `${area.title} has too few subfields`);
     assert.ok(concepts.length >= 25, `${area.title} has too few concepts`);
   }
-  assert.equal(data.subfields.length, 70);
-  assert.equal(data.concepts.length, 350);
+  assert.equal(data.subfields.length, 167);
+  assert.equal(data.concepts.length, 835);
 });
 
 test("all identifiers and prerequisite references resolve", () => {
@@ -78,6 +80,7 @@ test("every concept has an edition-specific located bibliography", () => {
 test("static entrypoint loads the curriculum and interaction scripts", () => {
   const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
   assert.match(html, /curriculum\.js/);
+  assert.match(html, /expansion\.js/);
   assert.match(html, /app\.js/);
   assert.match(html, /id="subfieldTree"/);
   assert.match(html, /id="bibliographyList"/);
