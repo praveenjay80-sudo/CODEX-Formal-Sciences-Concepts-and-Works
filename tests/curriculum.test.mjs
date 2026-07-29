@@ -81,4 +81,6 @@ test("static entrypoint loads the curriculum and interaction scripts", () => {
   assert.match(html, /app\.js/);
   assert.match(html, /id="subfieldTree"/);
   assert.match(html, /id="bibliographyList"/);
+  assert.match(html, /id="addItemForm"/);
+  assert.match(html, /Add and submit to main taxonomy/);
 });
