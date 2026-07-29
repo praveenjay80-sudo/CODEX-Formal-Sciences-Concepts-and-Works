@@ -7,8 +7,10 @@ if (!apiKey) {
 }
 
 const source = fs.readFileSync(new URL("../curriculum.js", import.meta.url), "utf8");
+const expansion = fs.readFileSync(new URL("../expansion.js", import.meta.url), "utf8");
 const context = { window: {} };
 vm.runInNewContext(source, context);
+vm.runInNewContext(expansion, context);
 const data = context.window.FORMAL_SCIENCES_CURRICULUM;
 const compact = {
   areas: data.areas.map((area) => ({
