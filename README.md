@@ -17,7 +17,7 @@ An interactive prerequisite tree and concept-specific bibliography covering thes
 13. Computer science
 14. Cryptography
 
-The curriculum contains 70 subfields and 350 learnable concepts. Every published concept has:
+The curriculum contains 167 subfields and 835 learnable concepts, distributed unevenly according to each area’s actual breadth. Every published concept has:
 
 - sequential prerequisite links;
 - parallel-preparation links where justified;
