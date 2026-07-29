@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A prerequisite-first curriculum and concept-specific bibliography for the formal sciences.">
+  <title>Formal Sciences Curriculum Atlas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Formal Sciences Curriculum Atlas home">
+      <span class="brand-mark">FS</span>
+      <span><strong>Formal Sciences</strong><small>Curriculum Atlas</small></span>
+    </a>
+    <label class="search">
+      <span>Search</span>
+      <input id="searchInput" type="search" placeholder="Concept, subfield, author, or work" autocomplete="off">
+      <kbd>/</kbd>
+    </label>
+    <div class="top-actions">
+      <button id="auditButton" class="button secondary">Audit</button>
+      <a class="button" href="https://github.com/praveenjay80-sudo/CODEX-Formal-Sciences-Concepts-and-Works" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="areas-panel" aria-label="Formal science areas">
+      <div class="panel-heading">
+        <span class="eyebrow">Curriculum scope</span>
+        <h1>14 connected areas</h1>
+        <p>Choose an area, then move from subfield to concept. Shared concepts appear once and connect across areas.</p>
+      </div>
+      <nav id="areaList" class="area-list"></nav>
+      <div class="legend">
+        <span><i class="dot required"></i>Sequential prerequisite</span>
+        <span><i class="dot parallel"></i>Parallel prerequisite</span>
+      </div>
+    </aside>
+
+    <main class="tree-panel">
+      <div class="tree-header">
+        <div>
+          <span id="areaKind" class="eyebrow">Area</span>
+          <h2 id="areaTitle">Logic</h2>
+          <p id="areaDescription"></p>
+        </div>
+        <div class="tree-stats" id="areaStats"></div>
+      </div>
+      <div id="searchResults" class="search-results" hidden></div>
+      <div id="subfieldTree" class="subfield-tree"></div>
+    </main>
+
+    <aside id="detailPanel" class="detail-panel" aria-live="polite">
+      <div class="detail-empty" id="detailEmpty">
+        <span class="empty-mark">↳</span>
+        <h2>Select a concept</h2>
+        <p>The detail panel shows its exact prerequisite path, parallel preparation, next concepts, and specific reading locations.</p>
+      </div>
+      <article id="detailContent" hidden>
+        <div class="detail-head">
+          <div>
+            <span id="detailArea" class="eyebrow"></span>
+            <h2 id="detailTitle"></h2>
+          </div>
+          <button id="closeDetail" class="icon-button" aria-label="Close details">×</button>
+        </div>
+        <p id="detailSummary" class="detail-summary"></p>
+        <div id="detailBadges" class="badges"></div>
+
+        <section class="detail-section">
+          <h3>Prerequisite structure</h3>
+          <div class="relation-block">
+            <div class="relation-title"><i class="dot required"></i>Learn first, in sequence</div>
+            <div id="requiredList" class="relation-list"></div>
+          </div>
+          <div class="relation-block">
+            <div class="relation-title"><i class="dot parallel"></i>Can be learned in parallel</div>
+            <div id="parallelList" class="relation-list"></div>
+          </div>
+          <div class="relation-block">
+            <div class="relation-title"><i class="dot next"></i>Directly unlocks</div>
+            <div id="nextList" class="relation-list"></div>
+          </div>
+        </section>
+
+        <section class="detail-section">
+          <div class="section-title-row">
+            <h3>Specific bibliography</h3>
+            <span id="workCount" class="count-pill"></span>
+          </div>
+          <p class="section-note">Each entry identifies a particular edition and a chapter, section, part, or paper location. Page numbers are avoided when they vary between printings.</p>
+          <div id="bibliographyList" class="bibliography-list"></div>
+        </section>
+      </article>
+    </aside>
+  </div>
+
+  <dialog id="auditDialog" class="audit-dialog">
+    <form method="dialog" class="dialog-head">
+      <div>
+        <span class="eyebrow">Deterministic validation</span>
+        <h2>Curriculum audit</h2>
+      </div>
+      <button class="icon-button" aria-label="Close audit">×</button>
+    </form>
+    <div class="audit-body">
+      <div id="auditMetrics" class="audit-metrics"></div>
+      <section>
+        <h3>Publication contract</h3>
+        <p id="coverageStatement"></p>
+      </section>
+      <section>
+        <h3>Checks</h3>
+        <div id="auditChecks" class="audit-checks"></div>
+      </section>
+      <section>
+        <h3>Semantic audit with OpenAI</h3>
+        <p>GitHub Pages cannot protect an API key. The repository includes <code>scripts/audit.mjs</code>, which reads <code>OPENAI_API_KEY</code> from your local environment and never places it in browser code.</p>
+        <button id="downloadAudit" type="button" class="button secondary">Download audit dataset</button>
+      </section>
+    </div>
+  </dialog>
+
+  <script src="curriculum.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
